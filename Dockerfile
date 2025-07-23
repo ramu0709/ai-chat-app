@@ -11,7 +11,7 @@ RUN apt update && apt install -y git && rm -rf /var/lib/apt/lists/*
 # Copy files
 COPY requirements.txt ./
 COPY chatbot.py ./
-COPY .env ./
+# COPY .env ./
 
 # Install Python packages
 RUN pip install --no-cache-dir -r requirements.txt
