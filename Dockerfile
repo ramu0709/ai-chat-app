@@ -2,19 +2,14 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Prevent interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install dependencies
-RUN apt update && apt install -y git && rm -rf /var/lib/apt/lists/*
-
-# Copy files
 COPY requirements.txt ./
-COPY chatbot.py ./
-# COPY .env ./
 
-# Install Python packages
+# Install torch manually to avoid GPU/cuda
+RUN pip install --no-cache-dir torch==2.2.2+cpu torchvision==0.17.2+cpu -f https://download.pytorch.org/whl/torch_stable.html
+
+# Install other packages
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Entrypoint
+COPY . .
+
 CMD ["python", "chatbot.py"]
