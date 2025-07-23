@@ -1,31 +1,33 @@
 pipeline {
-    agent any
+  agent any
 
-    environment {
-        HUGGINGFACE_TOKEN = credentials('hf-token')
+  environment {
+    IMAGE_NAME = "mistral-chatbot"
+  }
+
+  stages {
+    stage('Build Docker Image') {
+      steps {
+        withCredentials([string(credentialsId: 'hf-token', variable: 'HUGGINGFACE_TOKEN')]) {
+          sh '''
+            echo "HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}" > .env
+            docker build -t $IMAGE_NAME .
+            rm .env
+          '''
+        }
+      }
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/ramu0709/ai-chat-app.git'
-            }
+    stage('Run AI Chatbot (CPU)') {
+      steps {
+        withCredentials([string(credentialsId: 'hf-token', variable: 'HUGGINGFACE_TOKEN')]) {
+          sh '''
+            echo "HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}" > .env
+            docker run --env-file .env $IMAGE_NAME
+            rm .env
+          '''
         }
-
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t mistral-chatbot .'
-            }
-        }
-
-        stage('Run AI Chatbot (CPU)') {
-            steps {
-                sh '''
-                    docker run --rm \
-                      -e HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN \
-                      mistral-chatbot
-                '''
-            }
-        }
+      }
     }
+  }
 }
