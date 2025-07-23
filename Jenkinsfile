@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'git@github.com:ramu0709/ai-chat-app.git', credentialsId: 'github-ssh'
+                git url: 'https://github.com/ramu0709/ai-chat-app.git'
             }
         }
 
