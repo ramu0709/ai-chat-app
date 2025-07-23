@@ -1,0 +1,8 @@
+transformers
+accelerate
+gradio
+requests
+duckduckgo-search
+python-dotenv
+sentencepiece
+protobuf
