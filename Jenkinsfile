@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     // Write .env securely with HUGGINGFACE_TOKEN from Jenkins secret
-                    writeFile file: '.env', text: "HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}"
+                    writeFile file: '.env', text: "HUGGINGFACE_TOKEN=" + HUGGINGFACE_TOKEN
                 }
                 sh '''
                     echo "[INFO] 🔨 Building Docker image..."
