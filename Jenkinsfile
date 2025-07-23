@@ -6,7 +6,8 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+
+        stage('Checkout Code') {
             steps {
                 git url: 'https://github.com/ramu0709/ai-chat-app.git', branch: 'main'
             }
@@ -14,25 +15,28 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                withCredentials([string(credentialsId: 'huggingface-token', variable: 'HUGGINGFACE_TOKEN')]) {
-                    sh '''
-                        echo "HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}" > .env
-                        docker build -t mistral-chatbot .
-                        rm .env
-                    '''
+                script {
+                    // Write .env securely with HUGGINGFACE_TOKEN from Jenkins secret
+                    writeFile file: '.env', text: "HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}"
                 }
+                sh '''
+                    echo "[INFO] 🔨 Building Docker image..."
+                    docker build -t mistral-chatbot .
+                    rm .env
+                '''
             }
         }
 
-        stage('Run AI Chatbot (CPU)') {
+        stage('Run AI Chatbot (CPU only)') {
             steps {
-                withCredentials([string(credentialsId: 'huggingface-token', variable: 'HUGGINGFACE_TOKEN')]) {
-                    sh '''
-                        echo "HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}" > .env
-                        docker run --rm --env-file .env mistral-chatbot || true
-                        rm .env
-                    '''
+                script {
+                    writeFile file: '.env', text: "HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}"
                 }
+                sh '''
+                    echo "[INFO] 🧠 Starting Mistral chatbot on CPU..."
+                    docker run --rm -p 7860:7860 --env-file .env mistral-chatbot
+                    rm .env
+                '''
             }
         }
     }
