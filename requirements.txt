@@ -6,3 +6,4 @@ duckduckgo-search
 python-dotenv
 sentencepiece
 protobuf
+numpy<2.0
