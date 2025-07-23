@@ -9,6 +9,8 @@ print("[INFO] Loading tokenizer and model (CPU mode)...")
 tokenizer = AutoTokenizer.from_pretrained(model_id, token=token)
 model = AutoModelForCausalLM.from_pretrained(model_id, token=token)
 
+print("[INFO] ✅ Model loaded successfully!")
+
 generator = pipeline("text-generation", model=model, tokenizer=tokenizer)
 
 print("\n[INFO] Chatbot is ready! Type 'exit' to quit.")
