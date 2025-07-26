@@ -1,24 +1,24 @@
 pipeline {
-    agent any
+  agent any
 
-    environment {
-        HUGGINGFACE_TOKEN = credentials('huggingface-token') // Jenkins Secret Text ID
-    }
+  environment {
+    HUGGINGFACE_TOKEN = credentials('huggingface-token') // Secret Text from Jenkins Credentials
+  }
 
-    stages {
-        stage('Run AI Chatbot (CPU only)') {
-            steps {
-                script {
-                    echo "[INFO] 🧠 Running chatbot with cached Hugging Face model..."
+  stages {
+    stage('Run AI Chatbot (CPU only)') {
+      steps {
+        script {
+          echo "[INFO] 🧠 Running chatbot with cached Hugging Face model..."
 
-                    sh '''
-                    docker run --rm -p 7860:7860 \
-                        -e HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN \
-                        -v ~/.cache/huggingface:/root/.cache/huggingface \
-                        mistral-chatbot
-                    '''
-                }
-            }
+          sh '''
+            docker run --rm -p 7860:7860 \
+              -e HUGGINGFACE_TOKEN=$HUGGINGFACE_TOKEN \
+              -v $HOME/.cache/huggingface:/root/.cache/huggingface \
+              mistral-chatbot
+          '''
         }
+      }
     }
+  }
 }
