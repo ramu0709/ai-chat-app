@@ -23,5 +23,5 @@ gr.Interface(
     fn=chat_fn,
     inputs="text",
     outputs="text",
-    title="🧠 Mistral Chatbot"
+    title="🧠 Mistral Chatbot (CPU)"
 ).launch(server_name="0.0.0.0", server_port=7860)
