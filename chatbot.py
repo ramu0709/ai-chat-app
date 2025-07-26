@@ -15,8 +15,9 @@ model = AutoModelForCausalLM.from_pretrained(model_id, token=token, torch_dtype=
 def chat_fn(prompt):
     inputs = tokenizer(prompt, return_tensors="pt")
     outputs = model.generate(**inputs, max_new_tokens=200, do_sample=True)
-    return tokenizer.decode(outputs[0], skip_special_tokens=True)
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return response.strip()
 
-iface = gr.Interface(fn=chat_fn, inputs="text", outputs="text", title="🧠 Mistral Chatbot (CPU Only)")
-
-iface.launch(server_name="0.0.0.0", server_port=7860)
+gr.Interface(fn=chat_fn, inputs="text", outputs="text", title="🧠 Mistral Chatbot (CPU Only)").launch(
+    server_name="0.0.0.0", server_port=7860
+)
