@@ -1,0 +1,10 @@
+transformers==4.41.2
+accelerate
+torch==2.2.2
+sentencepiece
+gradio
+requests
+duckduckgo-search
+python-dotenv
+protobuf
+numpy<2.0
