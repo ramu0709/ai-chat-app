@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        HUGGINGFACE_TOKEN = credentials('huggingface-token') // Jenkins Secret Text
+        HUGGINGFACE_TOKEN = credentials('huggingface-token') // Jenkins secret token
     }
 
     stages {
@@ -18,7 +18,7 @@ pipeline {
                     writeFile file: '.env', text: "HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}"
                 }
                 sh '''
-                    echo "[INFO] 🔨 Building Docker image..."
+                    echo "[INFO] 🔨 Building mistral-chatbot image..."
                     docker build -t mistral-chatbot .
                     rm -f .env
                 '''
@@ -31,8 +31,14 @@ pipeline {
                     writeFile file: '.env', text: "HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}"
                 }
                 sh '''
-                    echo "[INFO] 🧠 Starting Mistral chatbot on CPU..."
-                    docker run --rm -p 7860:7860 --env-file .env mistral-chatbot
+                    echo "[INFO] 🧠 Running chatbot with cached Hugging Face model..."
+
+                    docker run --rm \
+                      -p 7860:7860 \
+                      --env-file .env \
+                      -v /home/ramu7/.cache/huggingface:/root/.cache/huggingface \
+                      mistral-chatbot
+
                     rm -f .env
                 '''
             }
