@@ -5,6 +5,6 @@ services:
     build: .
     ports:
       - "7860:7860"
-    env_file:
-      - .env
+    environment:
+      - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
     container_name: mistral-chatbot-ui
