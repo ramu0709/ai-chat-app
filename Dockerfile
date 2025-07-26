@@ -14,21 +14,17 @@ RUN apt update && apt install -y \
 # Upgrade pip
 RUN pip install --no-cache-dir --upgrade pip
 
-# Install CPU-only torch and torchvision
+# Install CPU-only PyTorch and dependencies
 RUN pip install --no-cache-dir torch==2.2.2+cpu torchvision==0.17.2+cpu \
     -f https://download.pytorch.org/whl/torch_stable.html
 
-# Copy requirements and install dependencies
+# Copy requirements and install
 COPY requirements.txt .
 RUN for i in 1 2 3; do \
-    pip install --no-cache-dir --timeout=300 -r requirements.txt && break || sleep 10; \
+    pip install --no-cache-dir -r requirements.txt && break || sleep 10; \
 done
 
-# Copy app code
 COPY . .
 
-# Expose Gradio/Flask port
 EXPOSE 7860
-
-# Run chatbot
 CMD ["python", "chatbot.py"]
