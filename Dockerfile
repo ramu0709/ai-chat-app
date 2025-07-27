@@ -15,21 +15,26 @@ RUN pip install --no-cache-dir --upgrade pip
 # 🔥 Install PyTorch (CPU-only)
 RUN pip install --no-cache-dir torch==2.2.2+cpu torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
-# 📦 Copy and install Python dependencies with retry logic
+# 📦 Copy and install requirements with fallback for gradio
 COPY requirements.txt .
-RUN for i in 1 2 3; do pip install --no-cache-dir -r requirements.txt && break || sleep 5; done
+RUN for i in 1 2 3; do \
+    pip install --no-cache-dir -r requirements.txt && break || sleep 5; \
+done
 
-# ✅ Final safety: check gradio is installed or fail early
-RUN pip show gradio || (echo "[FINAL ERROR] ❌ gradio not installed after retries!" && exit 1)
+# 🛠️ Manually install gradio again (just in case)
+RUN pip install --no-cache-dir gradio==4.27.0
 
-# 📋 Optional debug: list installed packages
+# ✅ Confirm gradio installed or fail early
+RUN python -c "import gradio" || (echo '[ERROR] ❌ Gradio still not available!' && exit 1)
+
+# 📋 List installed packages for debugging
 RUN pip list
 
-# 🧠 Copy app source code
+# 🧠 Copy all project files
 COPY . .
 
-# 🌐 Expose Gradio UI port
+# 🌐 Expose port for Gradio
 EXPOSE 7860
 
-# 🚀 Start the chatbot
+# 🚀 Start chatbot
 CMD ["python", "chatbot.py"]
