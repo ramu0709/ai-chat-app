@@ -2,33 +2,39 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Required build dependencies for gradio & others
+# ✅ Install system packages required by gradio and others
 RUN apt update && apt install -y \
     git \
     curl \
     build-essential \
     libffi-dev \
     libssl-dev \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    libgl1 \
+    pkg-config \
+    libcairo2 \
  && apt clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip
+# ✅ Upgrade pip
 RUN pip install --no-cache-dir --upgrade pip
 
-# Install PyTorch (CPU-only)
+# ✅ Install PyTorch (CPU only)
 RUN pip install --no-cache-dir torch==2.2.2+cpu torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
-# Copy requirements first and install dependencies
+# ✅ Install remaining dependencies with retry logic
 COPY requirements.txt .
 RUN for i in 1 2 3; do pip install --no-cache-dir -r requirements.txt && break || sleep 5; done
 
-# ✅ Extra safety: Explicitly confirm gradio is installed
+# ✅ Confirm gradio installed (fails early if not)
 RUN pip show gradio || (echo "[ERROR] ❌ gradio not installed!" && exit 1)
 
-# Show all installed packages (for debug)
+# Show all packages (optional debug)
 RUN pip list
 
-# Copy app code
+# Copy app files
 COPY . .
 
 EXPOSE 7860
