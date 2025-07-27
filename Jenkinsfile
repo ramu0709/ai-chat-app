@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        HUGGINGFACE_TOKEN = credentials('huggingface-token') // Jenkins secret ID
+        HUGGINGFACE_TOKEN = credentials('huggingface-token') // Jenkins Credentials ID
     }
 
     stages {
