@@ -21,5 +21,4 @@ def chat(prompt):
     return response
 
 iface = gr.Interface(fn=chat, inputs="text", outputs="text", title="🧠 Mistral Chatbot")
-
 iface.launch(server_name="0.0.0.0", server_port=7860)
