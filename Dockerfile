@@ -1,12 +1,10 @@
-# Use Python slim base
+# Use lightweight Python image
 FROM python:3.10-slim
 
-# Set environment variables to prevent interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+# Set working directory
+WORKDIR /app
 
-# Install system dependencies
+# System packages required for sentencepiece and SSL
 RUN apt update && apt install -y \
     git \
     curl \
@@ -15,27 +13,26 @@ RUN apt update && apt install -y \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Use compatible version of NumPy
-RUN pip install --no-cache-dir "numpy<2"
-
-# Upgrade pip
+# Upgrade pip to latest version
 RUN pip install --no-cache-dir --upgrade pip
 
-# Install CPU-only PyTorch and torchvision
+# Install CPU-only Torch and torchvision
 RUN pip install --no-cache-dir torch==2.2.2+cpu torchvision==0.17.2+cpu \
     -f https://download.pytorch.org/whl/torch_stable.html
 
-# Copy requirements and install other packages (with retry logic)
+# Copy requirements first
 COPY requirements.txt .
-RUN for i in 1 2 3; do \
-    pip install --no-cache-dir -r requirements.txt && break || sleep 10; \
-done
 
-# Copy project files
+# Retry logic for slow installs
+RUN for i in 1 2 3; do \
+      pip install --no-cache-dir --timeout=300 -r requirements.txt && break || sleep 10; \
+    done
+
+# Copy all code
 COPY . .
 
-# Expose Gradio or Flask UI port
+# Expose default chatbot port
 EXPOSE 7860
 
-# Entry point to run the chatbot
+# Default command
 CMD ["python", "chatbot.py"]
