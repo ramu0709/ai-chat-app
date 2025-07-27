@@ -1,5 +1,7 @@
+# 🐍 Use slim Python base image
 FROM python:3.10-slim
 
+# 📂 Set working directory
 WORKDIR /app
 
 # 🧰 Install system dependencies
@@ -15,26 +17,31 @@ RUN pip install --no-cache-dir --upgrade pip
 # 🔥 Install PyTorch (CPU-only)
 RUN pip install --no-cache-dir torch==2.2.2+cpu torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
-# 📦 Copy and install requirements with fallback for gradio
+# 📦 Copy requirements file
 COPY requirements.txt .
+
+# 📥 Install Python packages from requirements.txt (retry loop)
 RUN for i in 1 2 3; do \
     pip install --no-cache-dir -r requirements.txt && break || sleep 5; \
 done
 
-# 🛠️ Manually install gradio again (just in case)
-RUN pip install --no-cache-dir gradio==4.27.0
+# 🧠 Manually ensure critical packages are present
+RUN pip install --no-cache-dir \
+    gradio==4.27.0 \
+    transformers==4.41.1 \
+    accelerate==0.30.1
 
-# ✅ Confirm gradio installed or fail early
-RUN python -c "import gradio" || (echo '[ERROR] ❌ Gradio still not available!' && exit 1)
+# ✅ Confirm gradio and transformers are installed, fail if not
+RUN python -c "import gradio, transformers" || (echo '[ERROR] ❌ Critical packages missing!' && exit 1)
 
-# 📋 List installed packages for debugging
+# 📋 Show installed packages (debugging)
 RUN pip list
 
-# 🧠 Copy all project files
+# 📂 Copy source code
 COPY . .
 
-# 🌐 Expose port for Gradio
+# 🌐 Expose Gradio UI port
 EXPOSE 7860
 
-# 🚀 Start chatbot
+# 🚀 Start the chatbot app
 CMD ["python", "chatbot.py"]
