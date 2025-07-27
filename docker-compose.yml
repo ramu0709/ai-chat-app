@@ -7,4 +7,6 @@ services:
       - "7860:7860"
     environment:
       - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
     container_name: mistral-chatbot-ui
