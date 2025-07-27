@@ -29,7 +29,8 @@ done
 RUN pip install --no-cache-dir \
     gradio==4.27.0 \
     transformers==4.41.1 \
-    accelerate==0.30.1
+    accelerate==0.30.1 \
+    sentencepiece
 
 # ✅ Confirm gradio and transformers are installed, fail if not
 RUN python -c "import gradio, transformers" || (echo '[ERROR] ❌ Critical packages missing!' && exit 1)
