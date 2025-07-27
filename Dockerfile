@@ -12,28 +12,28 @@ RUN apt update && apt install -y \
 # ⬆️ Upgrade pip
 RUN pip install --no-cache-dir --upgrade pip
 
-# 🧠 Install CPU-only PyTorch stack
+# 🧠 Install CPU-only PyTorch
 RUN pip install --no-cache-dir torch==2.2.2+cpu torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
-# 📦 Install remaining dependencies from requirements.txt with retry
+# 📦 Copy and install other requirements (except gradio)
 COPY requirements.txt .
+RUN pip install --no-cache-dir accelerate==0.30.1 sentencepiece==0.2.0 protobuf==4.25.3 transformers==4.40.2 pydantic==1.10.15
+
+# ✅ Install gradio separately with retry logic
 RUN for i in 1 2 3; do \
-      pip install --no-cache-dir -r requirements.txt \
+      pip install --no-cache-dir gradio==4.27.0 \
       && pip show gradio && break \
-      || (echo "[ERROR] ❌ gradio install attempt $i failed, retrying..." && sleep 5); \
+      || (echo "[WARN] 🔁 gradio install attempt $i failed, retrying..." && sleep 5); \
     done
 
-# ✅ Final safety: check gradio is installed or fail early
+# ❌ Fail early if gradio still not installed
 RUN pip show gradio || (echo "[FINAL ERROR] ❌ gradio not installed after retries!" && exit 1)
 
-# 📋 Show all installed packages (for debugging)
-RUN pip list
-
-# 📁 Copy app files
+# 🗂️ Copy all app files
 COPY . .
 
-# 🌐 Expose Gradio web UI port
+# 🌐 Expose port for Gradio UI
 EXPOSE 7860
 
-# 🚀 Run chatbot
+# 🚀 Launch the chatbot
 CMD ["python", "chatbot.py"]
