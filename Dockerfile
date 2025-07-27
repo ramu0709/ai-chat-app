@@ -1,38 +1,29 @@
-# Use lightweight Python image
 FROM python:3.10-slim
 
-# Set working directory
 WORKDIR /app
 
-# System packages required for sentencepiece and SSL
+# Install system dependencies
 RUN apt update && apt install -y \
     git \
     curl \
-    build-essential \
-    libffi-dev \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+ && apt clean \
+ && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip to latest version
+# Upgrade pip
 RUN pip install --no-cache-dir --upgrade pip
 
-# Install CPU-only Torch and torchvision
-RUN pip install --no-cache-dir torch==2.2.2+cpu torchvision==0.17.2+cpu \
-    -f https://download.pytorch.org/whl/torch_stable.html
+# Install PyTorch (CPU-only)
+RUN pip install --no-cache-dir torch==2.2.2+cpu torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
-# Copy requirements first
+# Copy requirements and install them with retry logic
 COPY requirements.txt .
+RUN for i in 1 2 3; do pip install --no-cache-dir -r requirements.txt && break || sleep 5; done
 
-# Retry logic for slow installs
-RUN for i in 1 2 3; do \
-      pip install --no-cache-dir --timeout=300 -r requirements.txt && break || sleep 10; \
-    done
-
-# Copy all code
+# Copy project files
 COPY . .
 
-# Expose default chatbot port
+# Expose the Gradio web port
 EXPOSE 7860
 
-# Default command
+# Run the chatbot
 CMD ["python", "chatbot.py"]
