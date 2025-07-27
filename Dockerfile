@@ -31,8 +31,7 @@ RUN pip install --no-cache-dir \
     transformers==4.41.1 \
     accelerate==0.30.1 \
     sentencepiece \
-    protobuf
-
+    protobuf==4.25.3
 # ✅ Confirm gradio and transformers are installed, fail if not
 RUN python -c "import gradio, transformers" || (echo '[ERROR] ❌ Critical packages missing!' && exit 1)
 
