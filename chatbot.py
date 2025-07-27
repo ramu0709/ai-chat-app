@@ -1,24 +1,24 @@
 import os
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import gradio as gr
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 
-token = os.environ.get("HUGGINGFACE_TOKEN")
-if not token:
-    raise ValueError("❌ HUGGINGFACE_TOKEN not found in environment!")
+token = os.getenv("HUGGINGFACE_TOKEN")
+model_id = "mistralai/Mistral-7B-Instruct-v0.3"
 
-print("[INFO] ✅ Loading tokenizer and model (CPU mode)...")
-tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.3", token=token)
-model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.3", token=token)
+print("[INFO] Loading tokenizer and model (CPU mode)...")
 
-def chat_fn(input_text):
-    inputs = tokenizer(input_text, return_tensors="pt")
-    outputs = model.generate(**inputs, max_new_tokens=200)
-    return tokenizer.decode(outputs[0], skip_special_tokens=True)
+tokenizer = AutoTokenizer.from_pretrained(model_id, token=token)
+model = AutoModelForCausalLM.from_pretrained(
+    model_id, device_map="auto", torch_dtype="auto", token=token
+)
 
-# 🚨 This line is critical to hold container
-gr.Interface(
-    fn=chat_fn,
-    inputs="text",
-    outputs="text",
-    title="🧠 Mistral Chatbot (CPU)"
-).launch(server_name="0.0.0.0", server_port=7860, block=True)
+print("[INFO] ✅ Model loaded successfully!")
+
+generator = pipeline("text-generation", model=model, tokenizer=tokenizer)
+
+print("\n[INFO] Chatbot is ready! Type 'exit' to quit.")
+while True:
+    prompt = input("\nYou: ")
+    if prompt.lower() == "exit":
+        break
+    response = generator(prompt, max_new_tokens=256, do_sample=True)[0]["generated_text"]
+    print(f"\nAI: {response}")
