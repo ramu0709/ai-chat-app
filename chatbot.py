@@ -1,4 +1,5 @@
 import os
+import gradio as gr
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 
 token = os.getenv("HUGGINGFACE_TOKEN")
@@ -15,10 +16,10 @@ print("[INFO] ✅ Model loaded successfully!")
 
 generator = pipeline("text-generation", model=model, tokenizer=tokenizer)
 
-print("\n[INFO] Chatbot is ready! Type 'exit' to quit.")
-while True:
-    prompt = input("\nYou: ")
-    if prompt.lower() == "exit":
-        break
+def chat(prompt):
     response = generator(prompt, max_new_tokens=256, do_sample=True)[0]["generated_text"]
-    print(f"\nAI: {response}")
+    return response
+
+iface = gr.Interface(fn=chat, inputs="text", outputs="text", title="🧠 Mistral Chatbot")
+
+iface.launch(server_name="0.0.0.0", server_port=7860)
